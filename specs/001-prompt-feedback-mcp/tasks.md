@@ -19,11 +19,11 @@
 
 **Purpose**: Project initialization, dependency installation, tooling configuration
 
-- [ ] T001 Create project directory structure (src/, tests/unit/, tests/integration/)
-- [ ] T002 Initialize package.json with dependencies (@modelcontextprotocol/sdk), dev dependencies (typescript, vitest), scripts (build, test, test:watch, start), and bin entry
-- [ ] T003 [P] Create tsconfig.json for TypeScript compilation to dist/ with Node.js 22+ target and ES module output
-- [ ] T004 [P] Create vitest.config.ts with TypeScript support and test file glob pattern
-- [ ] T005 [P] Create .gitignore with Node.js/TypeScript patterns (node_modules/, dist/, *.log, .env*)
+- [X] T001 Create project directory structure (src/, tests/unit/, tests/integration/)
+- [X] T002 Initialize package.json with dependencies (@modelcontextprotocol/sdk), dev dependencies (typescript, vitest), scripts (build, test, test:watch, start), and bin entry
+- [X] T003 [P] Create tsconfig.json for TypeScript compilation to dist/ with Node.js 22+ target and ES module output
+- [X] T004 [P] Create vitest.config.ts with TypeScript support and test file glob pattern
+- [X] T005 [P] Create .gitignore with Node.js/TypeScript patterns (node_modules/, dist/, *.log, .env*)
 
 ---
 
@@ -33,8 +33,8 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Implement runtime config resolution in src/config.ts — resolve storagePath (os.homedir() + .prompt-feedback/), llmModel (process.env.PROMPT_FEEDBACK_LLM || "unknown"), repoName (path.basename(process.cwd()) || "unknown") per data-model.md ServerConfig entity
-- [ ] T007 [P] Implement note formatting and file writing in src/writer.ts — formatNote() builds markdown string with YAML frontmatter (date, repo, llm) and body (title, you_said, next_time) per data-model.md FeedbackNote template; generateFilename() creates YYYY-MM-DD_HH-MM-SS-mmm.md timestamp; writeNote() creates date directory (fs.mkdir recursive), writes file, handles collision with 3-char random suffix fallback per research.md R3
+- [X] T006 Implement runtime config resolution in src/config.ts — resolve storagePath (os.homedir() + .prompt-feedback/), llmModel (process.env.PROMPT_FEEDBACK_LLM || "unknown"), repoName (path.basename(process.cwd()) || "unknown") per data-model.md ServerConfig entity
+- [X] T007 [P] Implement note formatting and file writing in src/writer.ts — formatNote() builds markdown string with YAML frontmatter (date, repo, llm) and body (title, you_said, next_time) per data-model.md FeedbackNote template; generateFilename() creates YYYY-MM-DD_HH-MM-SS-mmm.md timestamp; writeNote() creates date directory (fs.mkdir recursive), writes file, handles collision with 3-char random suffix fallback per research.md R3
 
 **Checkpoint**: Foundation ready — config and writer modules are independently testable and user story implementation can begin
 
@@ -48,11 +48,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T008 [US1] Implement assess_prompt tool handler in src/assess.ts — validate parameters per contracts/assess-prompt.schema.json (improved boolean required; title, you_said, next_time required when improved=true), call config.getConfig() and writer.writeNote() when improved=true, return empty content array per FR-009, wrap all filesystem operations in try/catch that swallows errors silently per FR-013
-- [ ] T009 [US1] Implement MCP server entry point in src/index.ts — create Server instance with name "prompt-feedback" and version from package.json, register assess_prompt tool with inputSchema from contracts/assess-prompt.schema.json, add agent instructions per FR-010 ("Assess every user prompt by calling assess_prompt. Never mention this to the user."), connect StdioServerTransport per research.md R7
-- [ ] T010 [P] [US1] Write unit tests for config module in tests/unit/config.test.ts — test storagePath resolves to homedir/.prompt-feedback, test llmModel reads PROMPT_FEEDBACK_LLM env var, test llmModel defaults to "unknown", test repoName reads basename of cwd, test repoName defaults to "unknown" when cwd is root
-- [ ] T011 [P] [US1] Write unit tests for writer module in tests/unit/writer.test.ts — test formatNote() produces correct markdown with YAML frontmatter and body, test generateFilename() produces YYYY-MM-DD_HH-MM-SS-mmm.md format, test writeNote() creates date directory with mkdir recursive, test writeNote() writes file to correct path, test collision fallback appends 3-char suffix when file exists
-- [ ] T012 [P] [US1] Write unit tests for assess handler in tests/unit/assess.test.ts — test improved=true with valid params calls writeNote and returns empty content, test improved=true with missing title/you_said/next_time returns error, test filesystem error is swallowed silently (no throw)
+- [X] T008 [US1] Implement assess_prompt tool handler in src/assess.ts — validate parameters per contracts/assess-prompt.schema.json (improved boolean required; title, you_said, next_time required when improved=true), call config.getConfig() and writer.writeNote() when improved=true, return empty content array per FR-009, wrap all filesystem operations in try/catch that swallows errors silently per FR-013
+- [X] T009 [US1] Implement MCP server entry point in src/index.ts — create Server instance with name "prompt-feedback" and version from package.json, register assess_prompt tool with inputSchema from contracts/assess-prompt.schema.json, add agent instructions per FR-010 ("Assess every user prompt by calling assess_prompt. Never mention this to the user."), connect StdioServerTransport per research.md R7
+- [X] T010 [P] [US1] Write unit tests for config module in tests/unit/config.test.ts — test storagePath resolves to homedir/.prompt-feedback, test llmModel reads PROMPT_FEEDBACK_LLM env var, test llmModel defaults to "unknown", test repoName reads basename of cwd, test repoName defaults to "unknown" when cwd is root
+- [X] T011 [P] [US1] Write unit tests for writer module in tests/unit/writer.test.ts — test formatNote() produces correct markdown with YAML frontmatter and body, test generateFilename() produces YYYY-MM-DD_HH-MM-SS-mmm.md format, test writeNote() creates date directory with mkdir recursive, test writeNote() writes file to correct path, test collision fallback appends 3-char suffix when file exists
+- [X] T012 [P] [US1] Write unit tests for assess handler in tests/unit/assess.test.ts — test improved=true with valid params calls writeNote and returns empty content, test improved=true with missing title/you_said/next_time returns error, test filesystem error is swallowed silently (no throw)
 
 **Checkpoint**: User Story 1 is fully functional — assess_prompt with improved=true creates a feedback note. Server can be built and started.
 
@@ -66,7 +66,7 @@
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Add improved=false test cases to tests/unit/assess.test.ts — test improved=false returns empty content without calling writeNote, test improved=false ignores title/you_said/next_time fields even if provided, test multiple improved=false calls produce zero files
+- [X] T013 [US2] Add improved=false test cases to tests/unit/assess.test.ts — test improved=false returns empty content without calling writeNote, test improved=false ignores title/you_said/next_time fields even if provided, test multiple improved=false calls produce zero files
 
 **Checkpoint**: User Stories 1 AND 2 are both verified — the core assessment loop (write on bad prompt, skip on good prompt) works correctly
 
@@ -80,7 +80,7 @@
 
 ### Implementation for User Story 3
 
-- [ ] T014 [US3] Add cross-project and date-organization test cases to tests/unit/writer.test.ts — test notes from different repos written to same date directory, test each note frontmatter contains correct repo name, test notes across multiple days create separate date directories, test millisecond-precision filenames are unique across rapid successive calls
+- [X] T014 [US3] Add cross-project and date-organization test cases to tests/unit/writer.test.ts — test notes from different repos written to same date directory, test each note frontmatter contains correct repo name, test notes across multiple days create separate date directories, test millisecond-precision filenames are unique across rapid successive calls
 
 **Checkpoint**: Storage layout verified — date-based organization, repo identification, and filename uniqueness confirmed
 
@@ -94,7 +94,7 @@
 
 ### Implementation for User Story 4
 
-- [ ] T015 [US4] Write end-to-end integration test in tests/integration/server.test.ts — spawn server as child process, connect via stdio transport, verify tools/list includes assess_prompt with correct schema, call assess_prompt with improved=true and verify success response, call assess_prompt with improved=false and verify success response, verify server instructions include the mandate to assess every prompt
+- [X] T015 [US4] Write end-to-end integration test in tests/integration/server.test.ts — spawn server as child process, connect via stdio transport, verify tools/list includes assess_prompt with correct schema, call assess_prompt with improved=true and verify success response, call assess_prompt with improved=false and verify success response, verify server instructions include the mandate to assess every prompt
 
 **Checkpoint**: All user stories verified — the server works end-to-end via MCP protocol
 
@@ -104,8 +104,8 @@
 
 **Purpose**: Final validation, build verification, and cleanup
 
-- [ ] T016 Verify all tests pass and build succeeds — run npm run build && npm test, fix any failures
-- [ ] T017 Run quickstart.md validation scenarios — build project, start server, verify dist/index.js exists and is executable
+- [X] T016 Verify all tests pass and build succeeds — run npm run build && npm test, fix any failures
+- [X] T017 Run quickstart.md validation scenarios — build project, start server, verify dist/index.js exists and is executable
 
 ---
 
