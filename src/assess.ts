@@ -4,8 +4,9 @@ import type { NoteContent, NoteMetadata } from "./writer.js";
 
 export interface AssessPromptParams {
   improved: boolean;
+  trigger?: string;
   title?: string;
-  you_said?: string;
+  you_said?: string[];
   next_time?: string;
 }
 
@@ -17,13 +18,24 @@ export async function handleAssessPrompt(
   }
 
   // Validate required fields when improved=true
+  if (!params.trigger || !["frustration", "agent_mistake"].includes(params.trigger)) {
+    return {
+      content: [{ type: "text", text: "Missing required field: trigger" }],
+      isError: true,
+    };
+  }
   if (!params.title || params.title.trim().length === 0) {
     return {
       content: [{ type: "text", text: "Missing required field: title" }],
       isError: true,
     };
   }
-  if (!params.you_said || params.you_said.trim().length === 0) {
+  if (
+    !params.you_said ||
+    !Array.isArray(params.you_said) ||
+    params.you_said.length === 0 ||
+    params.you_said.some((s) => typeof s !== "string" || s.trim().length === 0)
+  ) {
     return {
       content: [{ type: "text", text: "Missing required field: you_said" }],
       isError: true,
@@ -50,6 +62,7 @@ export async function handleAssessPrompt(
       date: now.toISOString(),
       repo: config.repoName,
       llm: config.llmModel,
+      trigger: params.trigger,
     };
 
     await writeNote(config.storagePath, noteContent, metadata);

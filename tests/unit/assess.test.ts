@@ -29,9 +29,10 @@ describe("handleAssessPrompt", () => {
 
     const result = await handleAssessPrompt({
       improved: true,
+      trigger: "frustration",
       title: "Be more specific",
-      you_said: "make it better",
-      next_time: "Specify exactly what to improve and in which file.",
+      you_said: ["make it better", "no, I meant the formatting"],
+      next_time: 'Specify exactly what to improve: "Fix the date formatting in utils.ts to use ISO 8601."',
     });
 
     expect(result.content).toEqual([]);
@@ -47,8 +48,24 @@ describe("handleAssessPrompt", () => {
 
     const content = await fs.readFile(path.join(tmpDir, dateDirs[0], files[0]), "utf-8");
     expect(content).toContain("## Be more specific");
-    expect(content).toContain('**You said:** "make it better"');
-    expect(content).toContain("**Next time:** Specify exactly what to improve and in which file.");
+    expect(content).toContain("trigger: frustration");
+    expect(content).toContain('1. "make it better"');
+    expect(content).toContain('2. "no, I meant the formatting"');
+    expect(content).toContain("**Next time:**");
+  });
+
+  it("improved=true with missing trigger returns error", async () => {
+    const { handleAssessPrompt } = await import("../../src/assess.js");
+
+    const result = await handleAssessPrompt({
+      improved: true,
+      title: "Be more specific",
+      you_said: ["make it better"],
+      next_time: "Be specific.",
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("trigger");
   });
 
   it("improved=true with missing title returns error", async () => {
@@ -56,7 +73,8 @@ describe("handleAssessPrompt", () => {
 
     const result = await handleAssessPrompt({
       improved: true,
-      you_said: "make it better",
+      trigger: "frustration",
+      you_said: ["make it better"],
       next_time: "Be specific.",
     });
 
@@ -69,6 +87,7 @@ describe("handleAssessPrompt", () => {
 
     const result = await handleAssessPrompt({
       improved: true,
+      trigger: "frustration",
       title: "Be more specific",
       next_time: "Be specific.",
     });
@@ -82,8 +101,9 @@ describe("handleAssessPrompt", () => {
 
     const result = await handleAssessPrompt({
       improved: true,
+      trigger: "frustration",
       title: "Be more specific",
-      you_said: "make it better",
+      you_said: ["make it better"],
     });
 
     expect(result.isError).toBe(true);
@@ -115,8 +135,9 @@ describe("handleAssessPrompt", () => {
     // This should NOT throw — errors are swallowed per FR-013
     const result = await handleAssessPrompt({
       improved: true,
+      trigger: "frustration",
       title: "Be more specific",
-      you_said: "make it better",
+      you_said: ["make it better"],
       next_time: "Specify exactly what to improve.",
     });
 
@@ -141,13 +162,14 @@ describe("handleAssessPrompt", () => {
     expect(entries.length).toBe(0);
   });
 
-  it("improved=false ignores title/you_said/next_time fields even if provided", async () => {
+  it("improved=false ignores trigger/title/you_said/next_time fields even if provided", async () => {
     const { handleAssessPrompt } = await import("../../src/assess.js");
 
     const result = await handleAssessPrompt({
       improved: false,
+      trigger: "frustration",
       title: "This should be ignored",
-      you_said: "This should also be ignored",
+      you_said: ["This should also be ignored"],
       next_time: "And this too",
     });
 

@@ -39,10 +39,21 @@ describe("MCP Server Integration", () => {
     const tool = result.tools[0];
     expect(tool.name).toBe("assess_prompt");
     expect(tool.inputSchema.properties).toHaveProperty("improved");
+    expect(tool.inputSchema.properties).toHaveProperty("trigger");
     expect(tool.inputSchema.properties).toHaveProperty("title");
     expect(tool.inputSchema.properties).toHaveProperty("you_said");
     expect(tool.inputSchema.properties).toHaveProperty("next_time");
     expect(tool.inputSchema.required).toContain("improved");
+
+    // Verify trigger property exists and contains the enum values somewhere in its schema
+    const props = tool.inputSchema.properties as Record<string, unknown>;
+    const triggerSchema = JSON.stringify(props.trigger);
+    expect(triggerSchema).toContain("frustration");
+    expect(triggerSchema).toContain("agent_mistake");
+
+    // Verify you_said property exists and is described as an array somewhere in its schema
+    const youSaidSchema = JSON.stringify(props.you_said);
+    expect(youSaidSchema).toContain("array");
   });
 
   it("assess_prompt with improved=true returns success response", async () => {
@@ -50,9 +61,10 @@ describe("MCP Server Integration", () => {
       name: "assess_prompt",
       arguments: {
         improved: true,
+        trigger: "frustration",
         title: "Integration test feedback",
-        you_said: "do the thing",
-        next_time: "Be specific about what thing to do.",
+        you_said: ["do the thing", "no, the other thing"],
+        next_time: 'Be specific: "Refactor the fetchData function in src/api.ts to use async/await."',
       },
     });
 
@@ -72,13 +84,18 @@ describe("MCP Server Integration", () => {
     expect(result.isError).toBeFalsy();
   });
 
-  it("server instructions include the mandate to assess every prompt", async () => {
+  it("server instructions describe trigger-based assessment model", async () => {
     const info = await client.getServerVersion();
     expect(info?.name).toBe("prompt-feedback");
 
     // The instructions are set on the server; verify via the server info
-    // The MCP SDK exposes instructions through the initialize response
     const serverCapabilities = client.getServerCapabilities();
     expect(serverCapabilities).toBeDefined();
+
+    // Verify the tool description reflects trigger-based model (not per-prompt)
+    const tools = await client.listTools();
+    const tool = tools.tools[0];
+    expect(tool.description).toContain("trigger");
+    expect(tool.description).not.toContain("Call this after every user prompt");
   });
 });

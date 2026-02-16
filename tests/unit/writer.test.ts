@@ -7,15 +7,16 @@ import type { NoteContent, NoteMetadata } from "../../src/writer.js";
 
 const sampleContent: NoteContent = {
   title: "Be specific about the file format you want",
-  you_said: "make the filenames human readable",
+  you_said: ["make the filenames human readable", "no, I meant ISO format not slugs"],
   next_time:
-    "Rename journal files to YYYY-MM-DD_HH-MM-SS.md format — don't make me guess the format.",
+    'Specify the exact format upfront: "Rename journal files to YYYY-MM-DD_HH-MM-SS.md format." One prompt instead of two corrections.',
 };
 
 const sampleMetadata: NoteMetadata = {
   date: "2026-02-15T22:13:56.876Z",
   repo: "ai-journal-mcp",
   llm: "claude-sonnet-4.5",
+  trigger: "frustration",
 };
 
 describe("formatNote", () => {
@@ -26,18 +27,53 @@ describe("formatNote", () => {
     expect(result).toContain("date: 2026-02-15T22:13:56.876Z");
     expect(result).toContain("repo: ai-journal-mcp");
     expect(result).toContain("llm: claude-sonnet-4.5");
+    expect(result).toContain("trigger: frustration");
     expect(result).toContain("## Be specific about the file format you want");
-    expect(result).toContain('**You said:** "make the filenames human readable"');
-    expect(result).toContain(
-      "**Next time:** Rename journal files to YYYY-MM-DD_HH-MM-SS.md format",
-    );
+    expect(result).toContain("**You said:**");
+    expect(result).toContain('1. "make the filenames human readable"');
+    expect(result).toContain('2. "no, I meant ISO format not slugs"');
+    expect(result).toContain("**Next time:**");
   });
 
-  it("starts with YAML frontmatter delimiters", () => {
+  it("starts with YAML frontmatter delimiters and includes trigger", () => {
     const result = formatNote(sampleContent, sampleMetadata);
     const lines = result.split("\n");
     expect(lines[0]).toBe("---");
-    expect(lines[4]).toBe("---");
+    expect(lines[5]).toBe("---");
+  });
+
+  it("renders single-element you_said as a single numbered item", () => {
+    const singleContent: NoteContent = {
+      title: "Be more specific",
+      you_said: ["add auth to the app"],
+      next_time: 'Say "Add OAuth2 with Google provider" instead.',
+    };
+    const result = formatNote(singleContent, sampleMetadata);
+
+    expect(result).toContain('1. "add auth to the app"');
+    expect(result).not.toContain("2.");
+  });
+
+  it("renders multi-element you_said as numbered list preserving order", () => {
+    const multiContent: NoteContent = {
+      title: "Vague requirements",
+      you_said: ["add authentication", "no, OAuth not basic auth", "I said Google login"],
+      next_time: "Specify auth method and provider upfront.",
+    };
+    const result = formatNote(multiContent, sampleMetadata);
+
+    expect(result).toContain('1. "add authentication"');
+    expect(result).toContain('2. "no, OAuth not basic auth"');
+    expect(result).toContain('3. "I said Google login"');
+  });
+
+  it("includes agent_mistake trigger in frontmatter", () => {
+    const agentMistakeMetadata: NoteMetadata = {
+      ...sampleMetadata,
+      trigger: "agent_mistake",
+    };
+    const result = formatNote(sampleContent, agentMistakeMetadata);
+    expect(result).toContain("trigger: agent_mistake");
   });
 });
 
@@ -123,11 +159,13 @@ describe("writeNote", () => {
       date: "2026-02-16T10:00:00.000Z",
       repo: "project-alpha",
       llm: "claude-sonnet-4.5",
+      trigger: "frustration",
     };
     const metadata2: NoteMetadata = {
       date: "2026-02-16T10:00:01.000Z",
       repo: "project-beta",
       llm: "gpt-4o",
+      trigger: "agent_mistake",
     };
 
     const path1 = await writeNote(tmpDir, sampleContent, metadata1);
@@ -142,11 +180,13 @@ describe("writeNote", () => {
       date: "2026-02-16T10:00:00.000Z",
       repo: "project-alpha",
       llm: "claude-sonnet-4.5",
+      trigger: "frustration",
     };
     const metadata2: NoteMetadata = {
       date: "2026-02-16T10:00:01.000Z",
       repo: "project-beta",
       llm: "gpt-4o",
+      trigger: "agent_mistake",
     };
 
     const path1 = await writeNote(tmpDir, sampleContent, metadata1);
@@ -164,11 +204,13 @@ describe("writeNote", () => {
       date: "2026-02-15T10:00:00.000Z",
       repo: "test-repo",
       llm: "test-llm",
+      trigger: "frustration",
     };
     const metadataDay2: NoteMetadata = {
       date: "2026-02-16T10:00:00.000Z",
       repo: "test-repo",
       llm: "test-llm",
+      trigger: "frustration",
     };
 
     const path1 = await writeNote(tmpDir, sampleContent, metadataDay1);
@@ -190,6 +232,7 @@ describe("writeNote", () => {
         date: new Date(2026, 1, 16, 10, 0, 0, i).toISOString(),
         repo: "test-repo",
         llm: "test-llm",
+        trigger: "frustration",
       };
       const filePath = await writeNote(tmpDir, sampleContent, metadata);
       filenames.add(path.basename(filePath));

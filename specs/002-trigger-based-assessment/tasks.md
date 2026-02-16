@@ -21,9 +21,9 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T001 [P] Update `NoteContent` interface in src/writer.ts — change `you_said` from `string` to `string[]`
-- [ ] T002 [P] Update `NoteMetadata` interface in src/writer.ts — add `trigger: string` field
-- [ ] T003 Update `AssessPromptParams` interface in src/assess.ts — change `you_said` from `string` to `string[]`, add `trigger` field as optional string (enum enforced at schema level)
+- [X] T001 [P] Update `NoteContent` interface in src/writer.ts — change `you_said` from `string` to `string[]`
+- [X] T002 [P] Update `NoteMetadata` interface in src/writer.ts — add `trigger: string` field
+- [X] T003 Update `AssessPromptParams` interface in src/assess.ts — change `you_said` from `string` to `string[]`, add `trigger` field as optional string (enum enforced at schema level)
 
 **Checkpoint**: All interfaces updated. Module compilation may fail until handler/format code is updated in Phase 2.
 
@@ -37,11 +37,11 @@
 
 ### Implementation
 
-- [ ] T004 [US1] Update `formatNote` function in src/writer.ts — add `trigger` to YAML frontmatter, render `you_said` array as numbered markdown list under "You said" section (per research.md R3), keep "Next time" section unchanged
-- [ ] T005 [US1] Update `handleAssessPrompt` function in src/assess.ts — update validation to check `trigger` is present when `improved=true`, change `you_said` validation from string `.trim()` to array `.length` check with element validation, pass `trigger` through to `NoteMetadata`
-- [ ] T006 [US1] Update tool zod schema in src/index.ts — replace `you_said` `z.string()` with `z.array(z.string().min(1)).min(1)`, add `trigger` as `z.enum(["frustration", "agent_mistake"])`, update `next_time` description to mention concrete examples
-- [ ] T007 [US1] Update server `instructions` string in src/index.ts — replace "Silently assess every user prompt" with trigger-based instruction describing the two triggers and holistic evaluation approach
-- [ ] T008 [US1] Update tool `description` string in src/index.ts — replace "Call this after every user prompt" with trigger-based description explaining when to call (frustration or significant agent mistake only)
+- [X] T004 [US1] Update `formatNote` function in src/writer.ts — add `trigger` to YAML frontmatter, render `you_said` array as numbered markdown list under "You said" section (per research.md R3), keep "Next time" section unchanged
+- [X] T005 [US1] Update `handleAssessPrompt` function in src/assess.ts — update validation to check `trigger` is present when `improved=true`, change `you_said` validation from string `.trim()` to array `.length` check with element validation, pass `trigger` through to `NoteMetadata`
+- [X] T006 [US1] Update tool zod schema in src/index.ts — replace `you_said` `z.string()` with `z.array(z.string().min(1)).min(1)`, add `trigger` as `z.enum(["frustration", "agent_mistake"])`, update `next_time` description to mention concrete examples
+- [X] T007 [US1] Update server `instructions` string in src/index.ts — replace "Silently assess every user prompt" with trigger-based instruction describing the two triggers and holistic evaluation approach
+- [X] T008 [US1] Update tool `description` string in src/index.ts — replace "Call this after every user prompt" with trigger-based description explaining when to call (frustration or significant agent mistake only)
 
 **Checkpoint**: `assess_prompt` tool accepts the new schema and produces correctly formatted notes with trigger metadata and numbered prompt arrays. Both `trigger: "frustration"` and `trigger: "agent_mistake"` work through the same code path. `improved=false` still produces no note.
 
@@ -55,7 +55,7 @@
 
 ### Implementation
 
-- [ ] T009 [US3] Rewrite AGENTS.md — the agent MUST silently monitor every single user prompt for signs of frustration/irritation or significant agent mistakes. This is passive detection on every prompt, NOT calling the tool on every prompt. When a trigger IS detected: call `assess_prompt`, review the recent task context holistically, populate `you_said` array with relevant prompt paraphrases, set `trigger` enum, and set `improved=true` only if the user's prompts contributed. When NO trigger is detected: do nothing — no tool call, no assessment, no side effects. The key distinction: observe every prompt, act only on triggers.
+- [X] T009 [US3] Rewrite AGENTS.md — the agent MUST silently monitor every single user prompt for signs of frustration/irritation or significant agent mistakes. This is passive detection on every prompt, NOT calling the tool on every prompt. When a trigger IS detected: call `assess_prompt`, review the recent task context holistically, populate `you_said` array with relevant prompt paraphrases, set `trigger` enum, and set `improved=true` only if the user's prompts contributed. When NO trigger is detected: do nothing — no tool call, no assessment, no side effects. The key distinction: observe every prompt, act only on triggers.
 
 **Checkpoint**: All instruction surfaces (server instructions in index.ts from Phase 2, tool description in index.ts from Phase 2, and AGENTS.md from this phase) consistently describe the trigger-based model. No remnant of per-prompt mandate exists.
 
@@ -69,8 +69,8 @@
 
 ### Implementation
 
-- [ ] T010 [US4] Verify `formatNote` in src/writer.ts handles single-element `you_said` array (renders as `1. "prompt"` — not a numbered list with only item 1, just a single numbered item). Make sure to capture the raw user prompts without alteration.
-- [ ] T011 [US4] Verify `formatNote` in src/writer.ts handles multi-element `you_said` array (renders numbered list preserving chronological order)
+- [X] T010 [US4] Verify `formatNote` in src/writer.ts handles single-element `you_said` array (renders as `1. "prompt"` — not a numbered list with only item 1, just a single numbered item). Make sure to capture the raw user prompts without alteration.
+- [X] T011 [US4] Verify `formatNote` in src/writer.ts handles multi-element `you_said` array (renders numbered list preserving chronological order)
 
 **Checkpoint**: Notes correctly render both single-prompt and multi-prompt arrays. Format matches data-model.md file template.
 
@@ -80,11 +80,11 @@
 
 **Purpose**: Update all existing test files to match the new schema shape. Build and run full test suite.
 
-- [ ] T012 [P] Update unit tests in tests/unit/writer.test.ts — change `sampleContent.you_said` from string to array, add `trigger` to `sampleMetadata`, update `formatNote` assertions to check for numbered list format and trigger in frontmatter
-- [ ] T013 [P] Update unit tests in tests/unit/assess.test.ts — change `you_said` from string to array in all test cases, add `trigger` field to `improved=true` calls, add test for missing `trigger` returning error, update `improved=false` tests to verify trigger is also ignored
-- [ ] T014 Update integration test in tests/integration/server.test.ts — update schema assertions to check for `trigger` property and `you_said` as array type, update `improved=true` call to use array `you_said` and include `trigger`, update instructions assertion to no longer check for per-prompt mandate
-- [ ] T015 Run `npm run build` to verify TypeScript compilation with zero errors
-- [ ] T016 Run `npm test` to verify all tests pass
+- [X] T012 [P] Update unit tests in tests/unit/writer.test.ts — change `sampleContent.you_said` from string to array, add `trigger` to `sampleMetadata`, update `formatNote` assertions to check for numbered list format and trigger in frontmatter
+- [X] T013 [P] Update unit tests in tests/unit/assess.test.ts — change `you_said` from string to array in all test cases, add `trigger` field to `improved=true` calls, add test for missing `trigger` returning error, update `improved=false` tests to verify trigger is also ignored
+- [X] T014 Update integration test in tests/integration/server.test.ts — update schema assertions to check for `trigger` property and `you_said` as array type, update `improved=true` call to use array `you_said` and include `trigger`, update instructions assertion to no longer check for per-prompt mandate
+- [X] T015 Run `npm run build` to verify TypeScript compilation with zero errors
+- [X] T016 Run `npm test` to verify all tests pass
 
 **Checkpoint**: Full test suite passes. Build succeeds. All instruction surfaces, schema, handler, and writer are consistent with the trigger-based model.
 
