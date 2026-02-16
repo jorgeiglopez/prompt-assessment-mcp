@@ -4,7 +4,7 @@ import crypto from "node:crypto";
 
 export interface NoteContent {
   title: string;
-  you_said: string;
+  you_said: string[];
   next_time: string;
 }
 
@@ -12,6 +12,7 @@ export interface NoteMetadata {
   date: string;
   repo: string;
   llm: string;
+  trigger: string;
 }
 
 export function formatNote(content: NoteContent, metadata: NoteMetadata): string {
@@ -20,14 +21,21 @@ export function formatNote(content: NoteContent, metadata: NoteMetadata): string
     `date: ${metadata.date}`,
     `repo: ${metadata.repo}`,
     `llm: ${metadata.llm}`,
+    `trigger: ${metadata.trigger}`,
     "---",
   ].join("\n");
+
+  const numberedList = content.you_said
+    .map((prompt, i) => `${i + 1}. "${prompt}"`)
+    .join("\n");
 
   const body = [
     "",
     `## ${content.title}`,
     "",
-    `**You said:** "${content.you_said}"`,
+    "**You said:**",
+    "",
+    numberedList,
     "",
     `**Next time:** ${content.next_time}`,
     "",
