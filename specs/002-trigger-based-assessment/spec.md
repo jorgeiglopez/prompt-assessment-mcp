@@ -5,6 +5,12 @@
 **Status**: Draft  
 **Input**: User description: "Change prompt assessment from per-prompt evaluation to trigger-based holistic assessment. Instead of assessing every prompt individually, the agent should only assess when it detects user frustration/irritation or when the agent has made a significant mistake requiring rework. When triggered, the assessment covers the recent interaction holistically (task-based). The you_said field becomes an array of prompts, and next_time provides improvement guidance with examples."
 
+## Clarifications
+
+### Session 2026-02-16
+
+- Q: Should the tool/note capture which trigger type fired (frustration vs. agent mistake) for pattern analysis? → A: Yes. Add a `trigger` parameter (enum: `"frustration"` | `"agent_mistake"`) to the tool schema; include it in the note's frontmatter metadata.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Frustration-Triggered Holistic Assessment (Priority: P1)
@@ -83,15 +89,15 @@ When a triggered assessment identifies user prompts that could be improved, the 
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST expose a single tool called `assess_prompt` that accepts the parameters: `improved` (boolean, required), `title` (string, required when improved is true), `you_said` (array of strings, required when improved is true), and `next_time` (string, required when improved is true).
+- **FR-001**: The system MUST expose a single tool called `assess_prompt` that accepts the parameters: `improved` (boolean, required), `trigger` (enum: `"frustration"` | `"agent_mistake"`, required when improved is true), `title` (string, required when improved is true), `you_said` (array of strings, required when improved is true), and `next_time` (string, required when improved is true).
 - **FR-002**: The `you_said` parameter MUST be an array of strings, where each element is a brief quote or paraphrase of a user prompt relevant to the issue being assessed.
 - **FR-003**: When `improved` is `false`, the system MUST NOT create any file or produce any side effect.
 - **FR-004**: When `improved` is `true`, the system MUST create a single markdown feedback note file containing frontmatter metadata and the provided feedback content.
-- **FR-005**: Each feedback note MUST include automatically captured metadata: the current date/time (ISO 8601 format), the repository name (derived from the current working directory), and the LLM model identifier (from server configuration or environment).
+- **FR-005**: Each feedback note MUST include automatically captured metadata: the current date/time (ISO 8601 format), the repository name (derived from the current working directory), the LLM model identifier (from server configuration or environment), and the trigger type (`frustration` or `agent_mistake`).
 - **FR-006**: Feedback notes MUST be stored in the user's home directory under `.prompt-feedback/` organized into daily subdirectories using `YYYY-MM-DD` format.
 - **FR-007**: Each feedback note filename MUST follow the pattern `YYYY-MM-DD_HH-MM-SS-mmm.md` (timestamp to millisecond precision) to ensure uniqueness.
 - **FR-008**: The system MUST automatically create the storage directory structure if it does not already exist.
-- **FR-009**: Each feedback note MUST follow a consistent markdown format: YAML frontmatter (date, repo, llm) followed by a heading (title), a "You said" section listing each prompt from the array, and a "Next time" section with the actionable suggestion and example.
+- **FR-009**: Each feedback note MUST follow a consistent markdown format: YAML frontmatter (date, repo, llm, trigger) followed by a heading (title), a "You said" section listing each prompt from the array, and a "Next time" section with the actionable suggestion and example.
 - **FR-010**: The system MUST operate silently — it MUST NOT return any user-facing output, messages, or acknowledgments about the assessment to the conversation.
 - **FR-011**: If the system encounters a filesystem error while writing a feedback note, it MUST fail silently — swallow the error and allow the agent to continue unaffected.
 - **FR-012**: The system MUST ship with agent instructions that direct any AI agent to call `assess_prompt` only when specific triggers are detected (user frustration/irritation or significant agent mistake requiring rework), not after every prompt.
@@ -126,7 +132,7 @@ Feedback notes must adhere to the following style:
 
 ### Key Entities
 
-- **Feedback Note**: A single markdown file representing holistic prompt improvement feedback for a triggered interaction. Contains metadata (date, repo, LLM) and content (title, array of relevant prompt paraphrases, improvement suggestion with example). Stored in a date-organized directory structure.
+- **Feedback Note**: A single markdown file representing holistic prompt improvement feedback for a triggered interaction. Contains metadata (date, repo, LLM, trigger type) and content (title, array of relevant prompt paraphrases, improvement suggestion with example). Stored in a date-organized directory structure.
 - **Assessment Trigger**: A detected event (user frustration or significant agent mistake) that initiates the holistic assessment process. Does not guarantee a feedback note — the assessment may conclude the user's prompts were fine.
 - **Task Context**: The recent sequence of user prompts and agent responses forming a coherent unit of work. The scope the agent evaluates holistically when an assessment is triggered.
 - **Agent Instructions**: A set of directives shipped with the tool that tell any AI agent how to detect triggers, when to invoke the assessment, and how to perform holistic evaluation of the recent interaction.

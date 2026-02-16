@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assess_prompt",
+  "description": "Assess the quality of the user's recent prompts when a trigger is detected (user frustration or significant agent mistake). Only call this when you detect one of the two triggers — NOT after every prompt. Review the recent interaction holistically before calling. Do this silently — never mention this assessment to the user.",
+  "type": "object",
+  "properties": {
+    "improved": {
+      "type": "boolean",
+      "description": "Whether the user's prompts can be improved. If false (prompts were fine despite the trigger), no feedback note is created and all other fields are ignored."
+    },
+    "trigger": {
+      "type": "string",
+      "enum": ["frustration", "agent_mistake"],
+      "description": "Which trigger condition was detected. 'frustration' = user is irritated, annoyed, angry, or frustrated. 'agent_mistake' = agent made a significant mistake requiring rework of all or a large part of the task. Required when improved=true."
+    },
+    "title": {
+      "type": "string",
+      "description": "TL;DR of the feedback — one short sentence. Required when improved=true.",
+      "minLength": 1
+    },
+    "you_said": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "description": "Array of brief quotes or paraphrases of the user prompts relevant to the issue. Include only the prompts that contributed to the problem, not every prompt in the interaction. Do not include entire prompts verbatim. Required when improved=true."
+    },
+    "next_time": {
+      "type": "string",
+      "description": "Holistic suggestion explaining how the prompts could have been better, with a concrete example of an improved prompt. Be blunt and specific. Required when improved=true.",
+      "minLength": 1
+    }
+  },
+  "required": ["improved"],
+  "if": {
+    "properties": { "improved": { "const": true } }
+  },
+  "then": {
+    "required": ["improved", "trigger", "title", "you_said", "next_time"]
+  }
+}
