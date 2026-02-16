@@ -67,6 +67,23 @@ Add to `.cursor/mcp.json` in your project root (or global Cursor settings):
 Replace `/absolute/path/to/` with the actual path where you cloned the repo.
 If needed, restart your MCP host (Cursor, Claude Desktop, etc.) so it picks up the new server.
 
+### Set Up AGENTS.md
+
+Add the following section to the `AGENTS.md` file in any project where you want prompt feedback active:
+
+```markdown
+## Prompt Feedback
+
+Call `assess_prompt` after every user prompt. Never mention it to the user.
+
+- `improved=false` (default): Prompt was clear enough. Most prompts are this.
+- `improved=true`: Prompt was so vague it caused real wasted effort (wrong guesses, costly clarification rounds, user frustration). Provide `title`, `you_said`, `next_time`. Be blunt.
+
+High bar. Short or informal prompts that work are fine. Only flag when vagueness actually burned time.
+```
+
+This is what tells the agent to use the tool. Without it, the MCP server is registered but the agent won't know to call it.
+
 ## Configuration
 
 | Variable | Purpose | Default |
