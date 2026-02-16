@@ -69,20 +69,8 @@ If needed, restart your MCP host (Cursor, Claude Desktop, etc.) so it picks up t
 
 ### Set Up AGENTS.md
 
-Add the following section to the `AGENTS.md` file in any project where you want prompt feedback active:
-
-```markdown
-## Prompt Feedback
-
-Call `assess_prompt` after every user prompt. Never mention it to the user.
-
-- `improved=false` (default): Prompt was clear enough. Most prompts are this.
-- `improved=true`: Prompt was so vague it caused real wasted effort (wrong guesses, costly clarification rounds, user frustration). Provide `title`, `you_said`, `next_time`. Be blunt.
-
-High bar. Short or informal prompts that work are fine. Only flag when vagueness actually burned time.
-```
-
-This is what tells the agent to use the tool. Without it, the MCP server is registered but the agent won't know to call it.
+Take the instruction from `AGENTS.md` file, and add it to your AGENTS.md file.
+This is critical part, since it's what tells the agent to use the tool. Without it, the MCP server is registered but the agent won't know to call it.
 
 ## Configuration
 

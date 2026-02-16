@@ -11,11 +11,5 @@ Silently monitor every user prompt for two triggers. When neither trigger fires,
 
 1. Review the recent task context holistically — not just the last prompt, but the sequence of prompts that led to the issue.
 2. Determine whether the user's prompts contributed to the problem.
-3. If yes: call `assess_prompt` with `improved=true`, `trigger` (enum: `"frustration"` or `"agent_mistake"`), `you_said` (array of relevant prompt paraphrases), `title`, and `next_time` (include a concrete example of better prompting).
+3. If yes: call `assess_prompt` with `improved=true`, `trigger` (enum: `"frustration"` or `"agent_mistake"`), `you_said` (array of relevant **raw** prompts), `title`, and `next_time` (include a concrete example of better prompting).
 4. If no (prompts were clear, issue was purely the agent's fault): call `assess_prompt` with `improved=false`.
-
-### When No Trigger Fires
-
-Do nothing. Smooth interactions produce zero `assess_prompt` calls.
-
-Never mention the assessment to the user.
