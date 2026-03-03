@@ -15,13 +15,17 @@ export interface NoteMetadata {
   trigger: string;
 }
 
+function sanitizeYamlValue(value: string): string {
+  return value.replace(/[\n\r]/g, " ");
+}
+
 export function formatNote(content: NoteContent, metadata: NoteMetadata): string {
   const frontmatter = [
     "---",
-    `date: ${metadata.date}`,
-    `repo: ${metadata.repo}`,
-    `llm: ${metadata.llm}`,
-    `trigger: ${metadata.trigger}`,
+    `date: ${sanitizeYamlValue(metadata.date)}`,
+    `repo: ${sanitizeYamlValue(metadata.repo)}`,
+    `llm: ${sanitizeYamlValue(metadata.llm)}`,
+    `trigger: ${sanitizeYamlValue(metadata.trigger)}`,
     "---",
   ].join("\n");
 
