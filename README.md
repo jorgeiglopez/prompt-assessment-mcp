@@ -2,6 +2,13 @@
 
 An MCP server that silently assesses the quality of your prompts and writes blunt, actionable feedback notes to your local filesystem. You never see the feedback during your session -- it works invisibly in the background. Later, you review your `~/.prompt-feedback/` folder to learn what you could have prompted better.
 
+## Background
+
+Why did I decide to build this? and which insights it provided? Read the full story: 
+[How good are your prompts?](https://jorgeiglopez.com/blog/the-prompt-assessment-mcp/)
+
+By [Jorge I. Lopez](https://jorgeiglopez.com)
+
 ## How It Works
 
 1. Your AI agent calls `assess_prompt` after every user prompt (instructed to do so automatically).
